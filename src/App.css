@@ -19,6 +19,7 @@ button {
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr 1fr;
     border: 1px solid rgba(255, 255, 255, 0.3);
+    margin: 0.5rem;
 }
 
 .game-board-cell {
@@ -26,8 +27,8 @@ button {
     padding: 1rem;
     max-width: 6rem;
     max-height: 6rem;
-    min-width: 60px;
-    min-height: 60px;
+    min-width: 50px;
+    min-height: 50px;
     aspect-ratio: 1/1;
     display: flex;
     justify-content: center;
