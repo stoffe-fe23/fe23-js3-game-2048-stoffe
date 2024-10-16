@@ -13,7 +13,7 @@ import GameBoard from './GameBoard';
 import GameTools from "./GameTools";
 
 function App() {
-    const touchStart = { x: 0, y: 0, time: 0 };
+    let touchStartX, touchStartY, touchTimeStart;
 
     /*********************************************************************
      * React hooks
@@ -24,6 +24,8 @@ function App() {
 
     // Keep track of the game score. 
     const [scoreTotal, setScoreTotal] = useState(0);
+
+
 
     // Save game board state (4x4 square grid) - Handle game actions
     const [gameBoard, gameBoardDispatch] = useReducer((state, action) => {
@@ -67,9 +69,13 @@ function App() {
     // Set keydown handler on document to detect arrow key presses.
     useEffect(() => {
         document.addEventListener("keydown", onArrowKeyDown);
+        document.addEventListener("touchmove", onTouchHandler, { passive: false });
 
         // Clean up event handler when unmounting component. 
-        return () => document.removeEventListener("keydown", onArrowKeyDown);
+        return () => {
+            document.removeEventListener("keydown", onArrowKeyDown);
+            document.removeEventListener("touchmove", onTouchHandler, { passive: false });
+        }
     }, []);
 
 
@@ -84,45 +90,40 @@ function App() {
         }
     }
 
-    // TODO: Kolla istället dndkit för swipe-event mm. (npm modul)
-    // Track swipes on touch screens: store start coordinates and time
-    function onTouchStart(event) {
-        touchStart.y = event.touches[0].clientY;
-        touchStart.x = event.touches[0].clientX;
-        touchStart.time = Date.now();
-    }
-
-
     // Track swipes on touch screens: compare end coordinates to start coordinates to determine direction. 
-    function onTouchEnd(event) {
-        const touchEnd = {
-            x: event.changedTouches[0].clientX,
-            y: event.changedTouches[0].clientY,
-            time: Date.now()
+    function onTouchHandler(event) {
+        if (event.type == "touchstart") {
+            touchStartY = event.touches[0].clientY;
+            touchStartX = event.touches[0].clientX;
+            touchTimeStart = Date.now();
+            window.isSwiping = true;
         }
-        const moveThreshold = 50; // Must move at least this far to count as a swipe.
+        else if (event.type == "touchmove") {
+            // Prevent page from scrolling while swiping over the game board
+            if (window.isSwiping) {
+                event.preventDefault();
+            }
+        }
+        else if (event.type == "touchend") {
+            const touchEndX = event.changedTouches[0].clientX;
+            const touchEndY = event.changedTouches[0].clientY;
+            const moveThreshold = 50; // Must move at least this far to count as a swipe.
+            window.isSwiping = false;
 
-        // Check if touch has lasted long enough (0.15sec) to count as a swipe instead of a click
-        if ((touchEnd.time - touchStart.time) >= 150) {
-            // Swipe up
-            if (touchStart.y - touchEnd.y >= moveThreshold) {
-                console.log("UP");
-                gameBoardDispatch({ type: "SwipeUp" });
-            }
-            // Swipe down
-            else if (touchEnd.y - touchStart.y >= moveThreshold) {
-                console.log("DOWN");
-                gameBoardDispatch({ type: "SwipeDown" });
-            }
-            // Swipe left
-            else if (touchStart.x - touchEnd.x >= moveThreshold) {
-                console.log("LEFT");
-                gameBoardDispatch({ type: "SwipeLeft" });
-            }
-            // Swipe right
-            else if (touchEnd.x - touchStart.x >= moveThreshold) {
-                console.log("RIGHT");
-                gameBoardDispatch({ type: "SwipeRight" });
+            // Check if touch has lasted long enough (0.15sec) to count as a swipe instead of a click
+            if ((Date.now() - touchTimeStart) >= 150) {
+                if (touchStartY - touchEndY >= moveThreshold) { // Swipe up
+                    gameBoardDispatch({ type: "SwipeUp" });
+                }
+                else if (touchEndY - touchStartY >= moveThreshold) { // Swipe down
+                    gameBoardDispatch({ type: "SwipeDown" });
+                }
+                else if (touchStartX - touchEndX >= moveThreshold) { // Swipe left
+                    gameBoardDispatch({ type: "SwipeLeft" });
+                }
+                else if (touchEndX - touchStartX >= moveThreshold) { // Swipe right
+                    gameBoardDispatch({ type: "SwipeRight" });
+                }
             }
         }
     }
@@ -169,7 +170,7 @@ function App() {
             <h1>2048!</h1>
             <button onClick={onGameStart}>{gameOn ? "Börja om" : "Spela!"}</button>
             <span className="score-display"><strong>Poäng: </strong>{scoreTotal}</span>
-            <GameBoard board={gameBoard} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} />
+            <GameBoard board={gameBoard} onTouchStart={onTouchHandler} onTouchEnd={onTouchHandler} />
         </>
     )
 }
