@@ -1,5 +1,5 @@
 # Grit Övningsuppgift, Javascript 3 - Kristoffer Bengtsson (FE23)
-## 2048 Game (Röj!)
+## 2048 Game (React)
 
 Simple 2048 game written in React. Work in Progress.
 
