@@ -1,0 +1,82 @@
+#root {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+
+h1 {
+    margin: 0;
+}
+
+button {
+    margin: 0.5rem 0 0.5rem 0;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.game-board-cell {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 1rem;
+    width: 6rem;
+    height: 6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: white;
+}
+
+.score-display {
+    margin-left: 2rem;
+}
+
+.game-board-cell-2 {
+    background-color: rgb(0, 77, 13);
+}
+
+.game-board-cell-4 {
+    background-color: rgb(0, 131, 22);
+}
+
+.game-board-cell-8 {
+    background-color: rgb(0, 230, 38);
+}
+
+.game-board-cell-16 {
+    background-color: rgb(197, 168, 0);
+}
+
+.game-board-cell-32 {
+    background-color: rgb(138, 117, 0);
+}
+
+.game-board-cell-64 {
+    background-color: rgb(95, 81, 0);
+}
+
+.game-board-cell-128 {
+    background-color: rgb(77, 0, 0);
+}
+
+.game-board-cell-256 {
+    background-color: rgb(139, 0, 0);
+}
+
+.game-board-cell-512 {
+    background-color: rgb(204, 0, 0);
+}
+
+.game-board-cell-1024 {
+    background-color: rgb(116, 0, 139);
+}
+
+.game-board-cell-2048 {
+    background-color: rgb(218, 0, 134);
+}
