@@ -66,14 +66,16 @@ function App() {
         [0, 0, 0, 0]
     ]);
 
-    // Set keydown handler on document to detect arrow key presses.
+
     useEffect(() => {
-        document.addEventListener("keydown", onArrowKeyDown);
+        // Set keydown handler on document to detect arrow key presses.
+        document.addEventListener("keydown", onArrowKeyPress);
+        // Set touchmove handler on document to avoid scrolling when swiping on the game board. 
         document.addEventListener("touchmove", onTouchHandler, { passive: false });
 
-        // Clean up event handler when unmounting component. 
+        // Clean up event handlers when unmounting component. 
         return () => {
-            document.removeEventListener("keydown", onArrowKeyDown);
+            document.removeEventListener("keydown", onArrowKeyPress);
             document.removeEventListener("touchmove", onTouchHandler, { passive: false });
         }
     }, []);
@@ -84,7 +86,7 @@ function App() {
      *********************************************************************/
 
     // Event handler responding to arrow key presses to control the game on devices without touch screens. 
-    function onArrowKeyDown(event) {
+    function onArrowKeyPress(event) {
         if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
             gameBoardDispatch({ type: event.key });
         }
