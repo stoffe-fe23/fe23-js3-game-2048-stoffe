@@ -4,7 +4,8 @@
 */
 
 class GameTools {
-    board = [];
+    board = [];     // Game board state array
+    moves = [];     // Array of of square moves that have been made on the board.
 
     #changes = 0;   // Track the number of changes to the gameboard a move resulted in.
     #merged = -1;   // Track row/col ID of merged square to prevent merging it again in the same move. 
@@ -15,17 +16,69 @@ class GameTools {
             this.resetGameBoard();
         }
         else {
-            this.board = gameBoard;
+            // Make a copy of the gameboard data to work with. 
+            this.board = gameBoard.map((row) => [...row]);
         }
+        this.moves = [];
         this.#changes = 0;
         this.onGameOver = onGameOver;
         this.onScoreUpdate = onScoreUpdate;
     }
 
 
-    // Get a copy of the full board array.  
+    /*********************************************************************
+     * Results retrieval methods 
+     *********************************************************************/
+
+    // Get the full board array.  
     getBoardData() {
-        return this.board.map((row) => [...row]);
+        return this.board;
+    }
+
+    // Get an array of coalesced square movements that have been performed.
+    // I.e. all moves originating from the same square are merged into a single move. 
+    // Return data is an array of move-arrays. Move-arrays contain two objects with the row and col of 
+    // the start position and destination position of that move. E.g:  
+    //[ /*    START             DEST   */
+    //  [{row: 0, col: 0}, {row: 0, col: 0}], 
+    //  [{row: 0, col: 0}, {row: 0, col: 0}] 
+    //]
+    getSquareMoves() {
+        const moveList = [];
+
+        this.moves.forEach((move, itr) => {
+            const [start, end] = move;
+
+            // Check if this start position matches the end position of a previous move. 
+            const idx = moveList.findIndex((findMove) => {
+                const [foundStart, foundEnd, foundLast] = findMove;
+                return (foundLast.row == start.row) && (foundLast.col == start.col);
+            });
+
+            // No previous move, just add the move to the list.
+            if (idx === -1) {
+                moveList.push([
+                    { row: start.row, col: start.col },
+                    { row: end.row, col: end.col },
+                    { row: end.row, col: end.col }
+                ]);
+            }
+            // Found previous move, update its destination position instead. 
+            else {
+                moveList[idx] = [
+                    { row: moveList[idx][0].row, col: moveList[idx][0].col },
+                    { row: end.row, col: end.col },
+                    { row: end.row, col: end.col }
+                ];
+            }
+        });
+
+        // Remove the element tracking last position of squares, just needed above. 
+        moveList.forEach((move, moveIdx) => {
+            move.pop();
+        })
+
+        return moveList;
     }
 
 
@@ -36,6 +89,7 @@ class GameTools {
     // Reset the board array to a blank default state. 
     resetGameBoard() {
         this.#changes = 0;
+        this.moves = [];
         this.board = [
             [0, 0, 0, 0],
             [0, 0, 0, 0],
@@ -192,6 +246,7 @@ class GameTools {
                 this.board[cmpRow][cmpCol] = this.board[row][col];
                 this.board[row][col] = 0;
                 this.#changes++;
+                this.moves.push([{ row: row, col: col }, { row: cmpRow, col: cmpCol }]);
                 // Check if there is another adjacent zero from the new position. 
                 this.moveBoardRowOrCol(cmpRow, cmpCol, dir, depth + 1, false);
             }
@@ -201,6 +256,7 @@ class GameTools {
                 this.board[cmpRow][cmpCol] = this.board[row][col] + this.board[cmpRow][cmpCol];
                 this.board[row][col] = 0;
                 this.#changes++;
+                this.moves.push([{ row: row, col: col }, { row: cmpRow, col: cmpCol }]);
                 this.#merged = mergeIdx;
                 this.onScoreUpdate(this.board[cmpRow][cmpCol]);
             }

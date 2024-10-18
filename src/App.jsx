@@ -25,46 +25,92 @@ function App() {
     // Keep track of the game score. 
     const [scoreTotal, setScoreTotal] = useState(0);
 
+    // Disable player controls while a move is being animated.
+    const [disableControls, disableControlsDispatch] = useReducer((state, action) => {
+        if (!state && action) {
+            setTimeout(() => disableControlsDispatch(false), 1100);
+        }
+        return action;
+
+    }, true);
 
 
     // Save game board state (4x4 square grid) - Handle game actions
+    // gameBoard = { board, overlay }, where board is the current game board, and
+    // overlay is the state of the board before the last move, used to animate square movement. 
     const [gameBoard, gameBoardDispatch] = useReducer((state, action) => {
-        const game = new GameTools(state, onScoreUpdate, onGameOver);
 
-        switch (action.type) {
-            case "SwipeLeft":
-            case "ArrowLeft":
-                gameOn && game.moveLeft();
-                break;
-            case "SwipeRight":
-            case "ArrowRight":
-                gameOn && game.moveRight();
-                break;
-            case "SwipeUp":
-            case "ArrowUp":
-                gameOn && game.moveUp();
-                break;
-            case "SwipeDown":
-            case "ArrowDown":
-                gameOn && game.moveDown();
-                break;
-            case "InitGame":
-                game.resetGameBoard();
-                game.addRandomNumberToBoard(2);
-                setGameOn(true);
-                setScoreTotal(0);
-                break;
-            case "GameOver":
-                setGameOn(false);
-                break;
+
+        if ((action.category == "controls") && gameOn && !disableControls) {
+            const game = new GameTools(state.board, onScoreUpdate, onGameOver);
+            switch (action.type) {
+                case "SwipeLeft":
+                case "ArrowLeft":
+                    disableControlsDispatch(true);
+                    game.moveLeft();
+                    break;
+                case "SwipeRight":
+                case "ArrowRight":
+                    disableControlsDispatch(true);
+                    game.moveRight();
+                    break;
+                case "SwipeUp":
+                case "ArrowUp":
+                    disableControlsDispatch(true);
+                    game.moveUp();
+                    break;
+                case "SwipeDown":
+                case "ArrowDown":
+                    disableControlsDispatch(true);
+                    game.moveDown();
+                    break;
+            }
+
+            return {
+                board: game.getBoardData(),
+                overlay: state.board,
+                moves: game.getSquareMoves()
+            };
         }
-        return game.getBoardData();
-    }, [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ]);
+        else if (action.category == "gamestate") {
+            const game = new GameTools(state.board, onScoreUpdate, onGameOver);
+
+            switch (action.type) {
+                case "InitGame":
+                    game.resetGameBoard();
+                    game.addRandomNumberToBoard(2);
+                    setGameOn(true);
+                    setScoreTotal(0);
+                    disableControlsDispatch(false);
+                    break;
+                case "GameOver":
+                    setGameOn(false);
+                    break;
+            }
+
+            return {
+                board: game.getBoardData(),
+                overlay: state.board,
+                moves: game.getSquareMoves()
+            };
+        }
+
+        return state;
+    }, {
+        board: [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        overlay: [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        moves: []
+    });
 
 
     useEffect(() => {
@@ -88,7 +134,7 @@ function App() {
     // Event handler responding to arrow key presses to control the game on devices without touch screens. 
     function onArrowKeyPress(event) {
         if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
-            gameBoardDispatch({ type: event.key });
+            gameBoardDispatch({ type: event.key, category: "controls" });
         }
     }
 
@@ -112,19 +158,19 @@ function App() {
             const moveThreshold = 50; // Must move at least this far to count as a swipe.
             window.isSwiping = false;
 
-            // Check if touch has lasted long enough (0.15sec) to count as a swipe instead of a click
+            // Check if touch has lasted long enough (0.15sec) to count as a swipe instead of a click/tap
             if ((Date.now() - touchTimeStart) >= 150) {
                 if (touchStartY - touchEndY >= moveThreshold) { // Swipe up
-                    gameBoardDispatch({ type: "SwipeUp" });
+                    gameBoardDispatch({ type: "SwipeUp", category: "controls" });
                 }
                 else if (touchEndY - touchStartY >= moveThreshold) { // Swipe down
-                    gameBoardDispatch({ type: "SwipeDown" });
+                    gameBoardDispatch({ type: "SwipeDown", category: "controls" });
                 }
                 else if (touchStartX - touchEndX >= moveThreshold) { // Swipe left
-                    gameBoardDispatch({ type: "SwipeLeft" });
+                    gameBoardDispatch({ type: "SwipeLeft", category: "controls" });
                 }
                 else if (touchEndX - touchStartX >= moveThreshold) { // Swipe right
-                    gameBoardDispatch({ type: "SwipeRight" });
+                    gameBoardDispatch({ type: "SwipeRight", category: "controls" });
                 }
             }
         }
@@ -133,7 +179,7 @@ function App() {
 
     // Event handler for the Start/Reset game button
     function onGameStart(event) {
-        gameBoardDispatch({ type: "InitGame" });
+        gameBoardDispatch({ type: "InitGame", category: "gamestate" });
     }
 
 
