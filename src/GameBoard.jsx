@@ -10,11 +10,11 @@ function GameBoard({ board, onTouchStart, onTouchEnd }) {
 
     // Build game board and create a square for each element in the board array.
     return (<>
-        <div className="game-board" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} >
+        <div id="game-board" className="game-board" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} >
             {
                 board.map((row, rowIdx) => {
                     return row.map((col, colIdx) => {
-                        return <GameSquare key={count} id={count++} value={board[rowIdx][colIdx]} />
+                        return <GameSquare key={count} id={`square-${count++}`} value={board[rowIdx][colIdx]} />
                     })
                 })
             }
