@@ -19,7 +19,7 @@ function GameBoard({ board, onTouchStart, onTouchEnd }) {
     useEffect(() => {
         if (board.moves.length) {
             // Show move overlay (starting at previous move gamestate)
-            overlayRef.current.style.display = "block";
+            overlayRef.current.style.display = "grid";
 
             // Animate the squares into the position of the current gamestate.
             board.moves.forEach((move) => {
