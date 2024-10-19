@@ -11,9 +11,8 @@ function GameBoard({ board, onTouchStart, onTouchEnd }) {
     let squareCount = 0;
     let cellCount = 0;
 
-    // Briefly display the overlay board
-    // TODO: Fix - This causes flickering as the updated gameboard is displayed for a few ms before the overlay appears.
-    //             This does not happen if just using CSS to show/hide the overlay instead of making React add it. 
+    // Should the board overlay be displayed? 
+    // TODO: Try to fix - This causes flickering as the main gameboard is displayed for a few millisec before the overlay appears.
     const [displayOverlay, setDisplayOverlay] = useReducer((state, action) => {
         if (!state && action)
             setTimeout(() => setDisplayOverlay(false), 1000);
@@ -21,23 +20,11 @@ function GameBoard({ board, onTouchStart, onTouchEnd }) {
         return !!action;
     }, false);
 
-    const overlayRef = useRef(null);
-
-    // Animate moves when the game board updates. 
+    // Display board overlay (1 sec) to animate moves when the game board state updates. 
     useEffect(() => {
+        // Do not bother if there are no moves to show... 
         if (board.moves.length) {
-            // Show move overlay (starting at previous move gamestate)
-            // overlayRef.current.style.display = "grid";
             setDisplayOverlay(true);
-
-            // WIP: Tried moving this into OverlaySquare component instead...
-            // Animate the squares into the position of the current gamestate.
-            /*
-            board.moves.forEach((move) => {
-                translateOverlaySquare(...move);
-            });
-            */
-
         }
     }, [board]);
 
@@ -57,11 +44,11 @@ function GameBoard({ board, onTouchStart, onTouchEnd }) {
                 }
 
             </div>
-            {displayOverlay && <div id="overlay-board" ref={overlayRef}>
+            {displayOverlay && <div id="overlay-board">
                 {
                     board.overlay.map((row, rowIdx) => {
                         return row.map((col, colIdx) => {
-                            // Check if there is a move involving this tile to display. 
+                            /* Check if there is a move involving this tile to display. move[0] is the starting position of the move, move[1] is the destination.  */
                             let foundMove = board.moves.find((move) => move[0].row == rowIdx && move[0].col == colIdx);
                             if (!foundMove) {
                                 foundMove = [{ row: rowIdx, col: colIdx }, { row: rowIdx, col: colIdx }];

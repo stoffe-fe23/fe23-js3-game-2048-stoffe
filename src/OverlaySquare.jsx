@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 
 export default function OverlaySquare({ id, value, moveFrom, moveTo }) {
+    // TODO: Get square size from style instead of hardcoding... 
     const moveX = (moveTo.col - moveFrom.col) * 74;
     const moveY = (moveTo.row - moveFrom.row) * 74;
 
@@ -24,7 +25,7 @@ export default function OverlaySquare({ id, value, moveFrom, moveTo }) {
 
     }, [value]);
 
-    // This does not trigger transition... Unless the overlay board is permanently visible. Why? 
+    // This does not trigger transition altough the transform works... Unless the overlay board is permanently visible. Why? 
     const moveStyle = { transform: `translate(${moveX}px, ${moveY}px)` };
     // console.log("MOVING TILE", id, `translate(${moveX}px, ${moveY}px)`);
 
