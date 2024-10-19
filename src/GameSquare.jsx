@@ -5,6 +5,7 @@
 */
 import { forwardRef } from "react";
 
+// TODO: Revert this, forwardRef no longer needed here.... 
 const GameSquare = forwardRef(({ id, value }, ref) => {
     return (<div ref={ref} className={value > 0 ? "game-board-cell game-board-cell-" + value : "game-board-cell"} id={`square-${id}`}>{value != 0 ? value : ""}</div>);
 });
