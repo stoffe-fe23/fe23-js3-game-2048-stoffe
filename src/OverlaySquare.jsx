@@ -20,12 +20,13 @@ export default function OverlaySquare({ id, value, moveFrom, moveTo }) {
         */
 
         // But this does... most of the time... why? 
+        const xform = squareRef.current.style.transform;
         squareRef.current.style.transform = "none";
-        setTimeout(() => squareRef.current.style.transform = `translate(${moveX}px, ${moveY}px)`, 30);
+        setTimeout(() => squareRef.current.style.transform = xform, 30);
 
     }, [value]);
 
-    // This does not trigger transition altough the transform works... Unless the overlay board is permanently visible. Why? 
+    // This does not trigger transition altough the transform works correctly... Unless the overlay board is permanently visible. Why? 
     const moveStyle = { transform: `translate(${moveX}px, ${moveY}px)` };
     // console.log("MOVING TILE", id, `translate(${moveX}px, ${moveY}px)`);
 
