@@ -1,7 +1,7 @@
 /*
     Grit-uppgift: Spelet 2048 - Javascript 3, Kristoffer Bengtsson, FE23
-    Game Square component, a square of the game board showing a numeric value. 
-    If the value is 0 the square is not displaying any value. 
+    Game Square component, a square of the overlay board showing a numeric value 
+    and animating movement into a new position on the board. 
 */
 import { useEffect, useRef, useState } from "react";
 
@@ -12,6 +12,7 @@ export default function OverlaySquare({ id, value, moveFrom, moveTo }) {
 
     const squareRef = useRef(null);
 
+    // TODO: Trying to fix problem below. Ugly... 
     useEffect(() => {
         // This does not trigger transition either.... 
         /*
@@ -26,9 +27,11 @@ export default function OverlaySquare({ id, value, moveFrom, moveTo }) {
 
     }, [value]);
 
-    // This does not trigger transition altough the transform works correctly... Unless the overlay board is permanently visible. Why? 
+    // TODO: This does not trigger transition anim altough the transform works correctly... 
+    // Unless the overlay board is permanently visible, then square transitions animate. Why? 
     const moveStyle = { transform: `translate(${moveX}px, ${moveY}px)` };
-    // console.log("MOVING TILE", id, `translate(${moveX}px, ${moveY}px)`);
+
+    // console.log("OVERLAY TILE", id, `translate(${moveX}px, ${moveY}px)`);
 
     return (<div ref={squareRef} style={moveStyle} className={"game-board-cell game-overlay-cell game-board-cell-" + value} id={`cell-${id}`}>{value != 0 ? value : ""}</div>);
 }
