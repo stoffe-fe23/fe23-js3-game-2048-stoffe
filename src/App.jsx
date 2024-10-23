@@ -22,8 +22,19 @@ function App() {
     // State tracking if a game is currently on. 
     const [gameOn, setGameOn] = useState(false);
 
+    const [gameStatus, setGameStatus] = useState("start");
+
     // Keep track of the game score. 
     const [scoreTotal, setScoreTotal] = useState(0);
+    const [highScore, setHighScore] = useState(() => {
+        const storedHighScore = localStorage.getItem("Game2048Score");
+        return storedHighScore ?? 0;
+    });
+
+    // Update highscore in storage if it changes. 
+    useEffect(() => {
+        localStorage.setItem("Game2048Score", highScore);
+    }, [highScore]);
 
     // Disable player controls while a move is being animated.
     const [disableControls, disableControlsDispatch] = useReducer((state, action) => {
@@ -34,37 +45,42 @@ function App() {
 
     }, true);
 
+    // Briefly display the game board overlay...
+    const [displayOverlay, setDisplayOverlay] = useReducer((state, action) => {
+        if (!state && action)
+            setTimeout(() => setDisplayOverlay(false), 1000);
+
+        return !!action;
+    }, false);
 
     // Save game board state (4x4 square grid) - Handle game actions
     // gameBoard = { board, overlay }, where board is the current game board, and
     // overlay is the state of the board before the last move, used to animate square movement. 
     const [gameBoard, gameBoardDispatch] = useReducer((state, action) => {
 
-
         if ((action.category == "controls") && gameOn && !disableControls) {
             const game = new GameTools(state.board, onScoreUpdate, onGameOver);
             switch (action.type) {
                 case "SwipeLeft":
                 case "ArrowLeft":
-                    disableControlsDispatch(true);
                     game.moveLeft();
                     break;
                 case "SwipeRight":
                 case "ArrowRight":
-                    disableControlsDispatch(true);
                     game.moveRight();
                     break;
                 case "SwipeUp":
                 case "ArrowUp":
-                    disableControlsDispatch(true);
                     game.moveUp();
                     break;
                 case "SwipeDown":
                 case "ArrowDown":
-                    disableControlsDispatch(true);
                     game.moveDown();
                     break;
             }
+
+            disableControlsDispatch(true);
+            setDisplayOverlay(true);
 
             return {
                 board: game.getBoardData(),
@@ -79,12 +95,14 @@ function App() {
                 case "InitGame":
                     game.resetGameBoard();
                     game.addRandomNumberToBoard(2);
+                    setGameStatus("playing");
                     setGameOn(true);
                     setScoreTotal(0);
                     disableControlsDispatch(false);
                     break;
                 case "GameOver":
                     setGameOn(false);
+                    setGameStatus("gameover");
                     break;
             }
 
@@ -116,6 +134,7 @@ function App() {
     useEffect(() => {
         // Set keydown handler on document to detect arrow key presses.
         document.addEventListener("keydown", onArrowKeyPress);
+
         // Set touchmove handler on document to avoid scrolling when swiping on the game board. 
         document.addEventListener("touchmove", onTouchHandler, { passive: false });
 
@@ -189,23 +208,28 @@ function App() {
 
     // Callback function updating the game score when a move has been made. 
     function onScoreUpdate(score) {
-        setScoreTotal((currentScore) => currentScore + score);
+        setScoreTotal((currentScore) => {
+            const newScore = currentScore + score;
+            if (newScore > highScore) {
+                setHighScore(newScore);
+            }
+            return newScore;
+        });
         // We just got a square with a value of 2048. The game is won!
         if (score == 2048) {
-            // TODO: Show victory box/screen. 
             console.log("VICTORY!");
             setGameOn(false);
-            alert("Victory!");
+            setGameStatus("victory");
         }
     }
 
 
     // Handle game over condition, either victory or defeat. 
     function onGameOver() {
-        // TODO: Show game over box/screen.
+        // Cannot use gameBoardDispatch() here... 
         console.log("GAME OVER!");
         setGameOn(false);
-        alert("Game Over!");
+        setGameStatus("gameover");
     }
 
 
@@ -213,12 +237,22 @@ function App() {
      * Component elements JSX
      *********************************************************************/
 
+    const gameStatusStrings = {
+        victory: "Victory!",
+        gameover: "Game Over!",
+        playing: "Reach 2048",
+        start: "Play 2048"
+    }
+
     return (
         <>
-            <h1>2048!</h1>
-            <button onClick={onGameStart}>{gameOn ? "Börja om" : "Spela!"}</button>
-            <span className="score-display"><strong>Poäng: </strong>{scoreTotal}</span>
-            <GameBoard board={gameBoard} onTouchStart={onTouchHandler} onTouchEnd={onTouchHandler} />
+            <h1 className={`game-status-${gameStatus}`}>{gameStatusStrings[gameStatus] ?? "2048"}</h1>
+            <button onClick={onGameStart}>{gameOn ? "Restart" : "Play!"}</button>
+            <div className="scores">
+                <span className="score-display"><strong>Score: </strong>{scoreTotal}</span>
+                <span className="highscore-display"><strong>Highscore: </strong>{highScore}</span>
+            </div>
+            <GameBoard board={gameBoard} displayOverlay={displayOverlay} onTouchStart={onTouchHandler} onTouchEnd={onTouchHandler} />
         </>
     )
 }

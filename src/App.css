@@ -74,8 +74,18 @@ button {
     transition: transform 1s ease;
 }
 
+.scores {
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+}
+
 .score-display {
-    margin-left: 2rem;
+    margin-left: 1rem;
+}
+
+.highscore-display {
+    margin-right: 1rem;
 }
 
 .game-board-cell-2 {
@@ -120,4 +130,20 @@ button {
 
 .game-board-cell-2048 {
     background-color: rgb(218, 0, 134);
+}
+
+.game-status-gameover {
+    color: red;
+}
+
+.game-status-victory {
+    color: green;
+}
+
+.game-status-playing {
+    color: blue;
+}
+
+.game-status-start {
+    color: lightblue;
 }

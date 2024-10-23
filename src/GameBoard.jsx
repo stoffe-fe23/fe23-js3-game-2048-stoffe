@@ -7,27 +7,9 @@ import GameSquare from "./GameSquare";
 import OverlaySquare from "./OverlaySquare";
 
 
-function GameBoard({ board, onTouchStart, onTouchEnd }) {
+function GameBoard({ board, onTouchStart, onTouchEnd, displayOverlay }) {
     let squareCount = 0;
     let cellCount = 0;
-
-    // Should the board overlay be displayed? 
-    // TODO: Try to fix - This causes flickering as the main gameboard is displayed for a few millisec before the overlay appears.
-    const [displayOverlay, setDisplayOverlay] = useReducer((state, action) => {
-        if (!state && action)
-            setTimeout(() => setDisplayOverlay(false), 1000);
-
-        return !!action;
-    }, false);
-
-    // Display board overlay (1 sec) to animate moves when the game board state updates. 
-    useEffect(() => {
-        // Do not bother if there are no moves to show... 
-        if (board.moves.length) {
-            setDisplayOverlay(true);
-        }
-    }, [board]);
-
 
     // Build game boards and create a square for each element in the board array.
     // The main gameboard is always shown, while the overlay board is briefly displayed
