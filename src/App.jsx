@@ -20,21 +20,14 @@ function App() {
      *********************************************************************/
 
     // State tracking if a game is currently on. 
-    const [gameOn, setGameOn] = useState(false);
-
     const [gameStatus, setGameStatus] = useState("start");
 
-    // Keep track of the game score and higscore. 
+    // Keep track of the game score and highscore. 
     const [scoreTotal, setScoreTotal] = useState(0);
-    const [highScore, setHighScore] = useState(() => {
-        const storedHighScore = localStorage.getItem("Game2048Score");
-        return storedHighScore ?? 0;
-    });
+    const [highScore, setHighScore] = useState(() => localStorage.getItem("Game2048Score") ?? 0);
 
     // Update highscore in storage if it changes. 
-    useEffect(() => {
-        localStorage.setItem("Game2048Score", highScore);
-    }, [highScore]);
+    useEffect(() => localStorage.setItem("Game2048Score", highScore), [highScore]);
 
     // Disable player controls while a move is being animated for 1.1sec...
     const [disableControls, disableControlsDispatch] = useReducer((state, action) => {
@@ -53,16 +46,15 @@ function App() {
         return !!action;
     }, false);
 
-    // Save game board state (4x4 square grid) - Handle game actions
+    // game board state - Handle game actions
     // gameBoard = { board, overlay, moves }, where board is the current game board, and
     // overlay is the state of the board before the last move, used to animate square movement,
     // and moves is a list of square movements to animate on the overlay.  
     const [gameBoard, gameControlDispatch] = useReducer((state, action) => {
-        const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
         if ((action.category == "controls") && (gameStatus == "playing") && !disableControls) {
-            // Logic for manipulating the game board is located in the GameTools class. 
-            // const game = new GameTools(state.board, onScoreUpdate, onGameOver);
+            // Logic for manipulating the game board 
+            const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
             // React to player input, either arrow keys or swipes on the gameboard element. 
             switch (action.type) {
@@ -96,8 +88,8 @@ function App() {
             };
         }
         else if (action.category == "gamestate") {
-            // Logic for setup and reset of gameboard is in the GameTools class. 
-            // const game = new GameTools(state.board, onScoreUpdate, onGameOver);
+            // Logic for setup and reset of gameboard 
+            const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
             switch (action.type) {
                 case "InitGame":
@@ -105,18 +97,15 @@ function App() {
                     game.resetGameBoard();
                     game.addRandomNumberToBoard(2);
                     setGameStatus("playing");
-                    setGameOn(true);
                     setScoreTotal(0);
                     disableControlsDispatch(false);
                     break;
                 case "GameOver":
                     // End the current game. 
-                    setGameOn(false);
                     setGameStatus("gameover");
                     break;
                 case "Victory":
                     // End current game with victory condition.
-                    setGameOn(false);
                     setGameStatus("victory");
                     break;
             }
@@ -236,7 +225,6 @@ function App() {
         // We just got a square with a value of 2048. The game is won!
         if (score == 2048) {
             console.log("VICTORY!");
-            setGameOn(false);
             setGameStatus("victory");
         }
     }
@@ -245,7 +233,6 @@ function App() {
     // Handle game over condition. 
     function onGameOver() {
         console.log("GAME OVER!");
-        setGameOn(false);
         setGameStatus("gameover");
     }
 
