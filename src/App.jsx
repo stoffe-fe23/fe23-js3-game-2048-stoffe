@@ -60,7 +60,7 @@ function App() {
     const [gameBoard, gameControlDispatch] = useReducer((state, action) => {
         const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
-        if ((action.category == "controls") && gameOn && !disableControls) {
+        if ((action.category == "controls") && (gameStatus == "playing") && !disableControls) {
             // Logic for manipulating the game board is located in the GameTools class. 
             // const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
@@ -269,7 +269,7 @@ function App() {
                 <span className="highscore-display"><strong>Highscore: </strong>{highScore}</span>
             </div>
             <GameBoard board={gameBoard} displayOverlay={displayOverlay} onTouchStart={onTouchHandler} onTouchEnd={onTouchHandler} />
-            <button onClick={onGameStart}>{gameOn ? "Restart" : "Play!"}</button>
+            <button onClick={onGameStart}>{(gameStatus == "playing") ? "Restart" : "Play!"}</button>
         </div>
     )
 }

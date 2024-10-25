@@ -15,7 +15,7 @@ export default function OverlaySquare({ id, value, moveFrom, moveTo }) {
         const moveSquareX = (moveTo.col - moveFrom.col) * Math.round(cellStyle.width.slice(0, -2));
         const moveSquareY = (moveTo.row - moveFrom.row) * Math.round(cellStyle.height.slice(0, -2));
 
-        // Needs to be slightly delayed or the CSS transition animation will not play... 
+        // Needs to be slightly delayed or the CSS transition animation will not play... (.game-overlay-cell in App.css)
         setTimeout(() => squareRef.current.style.transform = `translate(${moveSquareX}px, ${moveSquareY}px)`, 30);
     }, [moveTo]);
 

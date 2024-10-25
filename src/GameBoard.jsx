@@ -30,13 +30,13 @@ function GameBoard({ board, onTouchStart, onTouchEnd, displayOverlay }) {
                         })
                     })
                 }
-
             </div>
             {displayOverlay && <div id="overlay-board">
                 {
                     board.overlay.map((row, rowIdx) => {
                         return row.map((col, colIdx) => {
-                            /* Check if there is a move involving this tile to display. move[0] is the starting position of the move, move[1] is the destination.  */
+                            /* Check if there is a move involving this tile to display. 
+                               move[0] is the starting position of the move, move[1] is the destination.  */
                             let foundMove = board.moves.find((move) => move[0].row == rowIdx && move[0].col == colIdx);
                             if (!foundMove) {
                                 foundMove = [{ row: rowIdx, col: colIdx }, { row: rowIdx, col: colIdx }];
