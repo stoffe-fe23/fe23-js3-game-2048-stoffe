@@ -20,7 +20,13 @@ function GameBoard({ board, onTouchStart, onTouchEnd, displayOverlay }) {
                 {
                     board.board.map((row, rowIdx) => {
                         return row.map((col, colIdx) => {
-                            return <GameSquare key={squareCount} id={squareCount++} value={board.board[rowIdx][colIdx]} />
+                            return (
+                                <GameSquare
+                                    key={squareCount}
+                                    id={squareCount++}
+                                    value={board.board[rowIdx][colIdx]}
+                                />
+                            )
                         })
                     })
                 }

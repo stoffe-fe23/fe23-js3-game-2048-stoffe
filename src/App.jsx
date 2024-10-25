@@ -1,6 +1,6 @@
 /*
     Grit-uppgift: Spelet 2048 - Javascript 3, Kristoffer Bengtsson, FE23
-    Main App component, display game board and Start Game button and handle user input.  
+    Main Game App component, display game board and Start Game button and handle user input.  
 
     TODO:
     * GameOver state when game has ended.  -- Show Game Over dialog box. 
@@ -57,11 +57,12 @@ function App() {
     // gameBoard = { board, overlay, moves }, where board is the current game board, and
     // overlay is the state of the board before the last move, used to animate square movement,
     // and moves is a list of square movements to animate on the overlay.  
-    const [gameBoard, gameBoardDispatch] = useReducer((state, action) => {
+    const [gameBoard, gameControlDispatch] = useReducer((state, action) => {
+        const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
         if ((action.category == "controls") && gameOn && !disableControls) {
             // Logic for manipulating the game board is located in the GameTools class. 
-            const game = new GameTools(state.board, onScoreUpdate, onGameOver);
+            // const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
             // React to player input, either arrow keys or swipes on the gameboard element. 
             switch (action.type) {
@@ -96,7 +97,7 @@ function App() {
         }
         else if (action.category == "gamestate") {
             // Logic for setup and reset of gameboard is in the GameTools class. 
-            const game = new GameTools(state.board, onScoreUpdate, onGameOver);
+            // const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
             switch (action.type) {
                 case "InitGame":
@@ -112,6 +113,11 @@ function App() {
                     // End the current game. 
                     setGameOn(false);
                     setGameStatus("gameover");
+                    break;
+                case "Victory":
+                    // End current game with victory condition.
+                    setGameOn(false);
+                    setGameStatus("victory");
                     break;
             }
 
@@ -163,7 +169,7 @@ function App() {
     // Event handler responding to arrow key presses to control the game on devices without touch screens. 
     function onArrowKeyPress(event) {
         if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
-            gameBoardDispatch({ type: event.key, category: "controls" });
+            gameControlDispatch({ type: event.key, category: "controls" });
         }
     }
 
@@ -190,16 +196,16 @@ function App() {
             // Check if touch has lasted long enough (0.15sec) to count as a swipe instead of a click/tap
             if ((Date.now() - touchTimeStart) >= 150) {
                 if (touchStartY - touchEndY >= moveThreshold) { // Swipe up
-                    gameBoardDispatch({ type: "SwipeUp", category: "controls" });
+                    gameControlDispatch({ type: "SwipeUp", category: "controls" });
                 }
                 else if (touchEndY - touchStartY >= moveThreshold) { // Swipe down
-                    gameBoardDispatch({ type: "SwipeDown", category: "controls" });
+                    gameControlDispatch({ type: "SwipeDown", category: "controls" });
                 }
                 else if (touchStartX - touchEndX >= moveThreshold) { // Swipe left
-                    gameBoardDispatch({ type: "SwipeLeft", category: "controls" });
+                    gameControlDispatch({ type: "SwipeLeft", category: "controls" });
                 }
                 else if (touchEndX - touchStartX >= moveThreshold) { // Swipe right
-                    gameBoardDispatch({ type: "SwipeRight", category: "controls" });
+                    gameControlDispatch({ type: "SwipeRight", category: "controls" });
                 }
             }
         }
@@ -208,7 +214,7 @@ function App() {
 
     // Event handler for the Start/Reset game button
     function onGameStart(event) {
-        gameBoardDispatch({ type: "InitGame", category: "gamestate" });
+        gameControlDispatch({ type: "InitGame", category: "gamestate" });
     }
 
 
@@ -238,7 +244,6 @@ function App() {
 
     // Handle game over condition. 
     function onGameOver() {
-        // Cannot use gameBoardDispatch() here? 
         console.log("GAME OVER!");
         setGameOn(false);
         setGameStatus("gameover");
@@ -257,15 +262,15 @@ function App() {
     }
 
     return (
-        <>
+        <div id="game-2048">
             <h1 className={`game-status-${gameStatus}`}>{gameStatusStrings[gameStatus] ?? "2048"}</h1>
-            <button onClick={onGameStart}>{gameOn ? "Restart" : "Play!"}</button>
             <div className="scores">
                 <span className="score-display"><strong>Score: </strong>{scoreTotal}</span>
                 <span className="highscore-display"><strong>Highscore: </strong>{highScore}</span>
             </div>
             <GameBoard board={gameBoard} displayOverlay={displayOverlay} onTouchStart={onTouchHandler} onTouchEnd={onTouchHandler} />
-        </>
+            <button onClick={onGameStart}>{gameOn ? "Restart" : "Play!"}</button>
+        </div>
     )
 }
 
