@@ -24,7 +24,7 @@ function App() {
 
     const [gameStatus, setGameStatus] = useState("start");
 
-    // Keep track of the game score. 
+    // Keep track of the game score and higscore. 
     const [scoreTotal, setScoreTotal] = useState(0);
     const [highScore, setHighScore] = useState(() => {
         const storedHighScore = localStorage.getItem("Game2048Score");
@@ -36,7 +36,7 @@ function App() {
         localStorage.setItem("Game2048Score", highScore);
     }, [highScore]);
 
-    // Disable player controls while a move is being animated.
+    // Disable player controls while a move is being animated for 1.1sec...
     const [disableControls, disableControlsDispatch] = useReducer((state, action) => {
         if (!state && action) {
             setTimeout(() => disableControlsDispatch(false), 1100);
@@ -45,7 +45,7 @@ function App() {
 
     }, true);
 
-    // Briefly display the game board overlay...
+    // Briefly display the game board overlay for 1 sec...
     const [displayOverlay, setDisplayOverlay] = useReducer((state, action) => {
         if (!state && action)
             setTimeout(() => setDisplayOverlay(false), 1000);
@@ -54,12 +54,16 @@ function App() {
     }, false);
 
     // Save game board state (4x4 square grid) - Handle game actions
-    // gameBoard = { board, overlay }, where board is the current game board, and
-    // overlay is the state of the board before the last move, used to animate square movement. 
+    // gameBoard = { board, overlay, moves }, where board is the current game board, and
+    // overlay is the state of the board before the last move, used to animate square movement,
+    // and moves is a list of square movements to animate on the overlay.  
     const [gameBoard, gameBoardDispatch] = useReducer((state, action) => {
 
         if ((action.category == "controls") && gameOn && !disableControls) {
+            // Logic for manipulating the game board is located in the GameTools class. 
             const game = new GameTools(state.board, onScoreUpdate, onGameOver);
+
+            // React to player input, either arrow keys or swipes on the gameboard element. 
             switch (action.type) {
                 case "SwipeLeft":
                 case "ArrowLeft":
@@ -79,9 +83,11 @@ function App() {
                     break;
             }
 
+            // Lock player controls while animating the move on the gameboard overlay. 
             disableControlsDispatch(true);
             setDisplayOverlay(true);
 
+            // New state
             return {
                 board: game.getBoardData(),
                 overlay: state.board,
@@ -89,10 +95,12 @@ function App() {
             };
         }
         else if (action.category == "gamestate") {
+            // Logic for setup and reset of gameboard is in the GameTools class. 
             const game = new GameTools(state.board, onScoreUpdate, onGameOver);
 
             switch (action.type) {
                 case "InitGame":
+                    // Start a new game, reset everything to starting state. 
                     game.resetGameBoard();
                     game.addRandomNumberToBoard(2);
                     setGameStatus("playing");
@@ -101,11 +109,13 @@ function App() {
                     disableControlsDispatch(false);
                     break;
                 case "GameOver":
+                    // End the current game. 
                     setGameOn(false);
                     setGameStatus("gameover");
                     break;
             }
 
+            // New state
             return {
                 board: game.getBoardData(),
                 overlay: state.board,
@@ -135,10 +145,10 @@ function App() {
         // Set keydown handler on document to detect arrow key presses.
         document.addEventListener("keydown", onArrowKeyPress);
 
-        // Set touchmove handler on document to avoid scrolling when swiping on the game board. 
+        // Set touchmove handler on document to avoid scrolling when swiping on the game board element. 
         document.addEventListener("touchmove", onTouchHandler, { passive: false });
 
-        // Clean up event handlers when unmounting component. 
+        // Clean up the above event handlers when unmounting component. 
         return () => {
             document.removeEventListener("keydown", onArrowKeyPress);
             document.removeEventListener("touchmove", onTouchHandler, { passive: false });
@@ -166,7 +176,7 @@ function App() {
             window.isSwiping = true;
         }
         else if (event.type == "touchmove") {
-            // Prevent page from scrolling while swiping over the game board
+            // Prevent page from scrolling while swiping over the game board element.
             if (window.isSwiping) {
                 event.preventDefault();
             }
@@ -203,13 +213,15 @@ function App() {
 
 
     /*********************************************************************
-     * GameTools callbacks
+     * GameTools class callbacks
      *********************************************************************/
 
     // Callback function updating the game score when a move has been made. 
     function onScoreUpdate(score) {
         setScoreTotal((currentScore) => {
             const newScore = currentScore + score;
+
+            // Update the highscore if this score is better.
             if (newScore > highScore) {
                 setHighScore(newScore);
             }
@@ -224,9 +236,9 @@ function App() {
     }
 
 
-    // Handle game over condition, either victory or defeat. 
+    // Handle game over condition. 
     function onGameOver() {
-        // Cannot use gameBoardDispatch() here... 
+        // Cannot use gameBoardDispatch() here? 
         console.log("GAME OVER!");
         setGameOn(false);
         setGameStatus("gameover");

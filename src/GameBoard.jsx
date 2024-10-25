@@ -2,7 +2,7 @@
     Grit-uppgift: Spelet 2048 - Javascript 3, Kristoffer Bengtsson, FE23
     Game Board component, 4x4 grid of game squares with numeric values shown on them. 
 */
-import { useReducer, useRef, useEffect } from "react";
+
 import GameSquare from "./GameSquare";
 import OverlaySquare from "./OverlaySquare";
 
@@ -35,7 +35,15 @@ function GameBoard({ board, onTouchStart, onTouchEnd, displayOverlay }) {
                             if (!foundMove) {
                                 foundMove = [{ row: rowIdx, col: colIdx }, { row: rowIdx, col: colIdx }];
                             }
-                            return <OverlaySquare key={cellCount} id={cellCount++} moveFrom={foundMove[0]} moveTo={foundMove[1]} value={board.overlay[rowIdx][colIdx]} />
+                            return (
+                                <OverlaySquare
+                                    key={cellCount}
+                                    id={cellCount++}
+                                    moveFrom={foundMove[0]}
+                                    moveTo={foundMove[1]}
+                                    value={board.overlay[rowIdx][colIdx]}
+                                />
+                            )
                         })
                     })
                 }
